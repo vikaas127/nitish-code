@@ -51,7 +51,8 @@ def convert():
     global filename, start, last      
     try:
         c_label_var.set('Output...')
-        pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract'
+     #  pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract'
+        pytesseract.pytesseract.tesseract_cmd =r'C:\Program Files\Tesseract-OCR\tesseract.exe'
         text = pytesseract.image_to_string(filename)
         t.delete(1.0, END)
         t.insert(1.0, text)
@@ -108,7 +109,8 @@ f1 = Frame()
 f1.config(bg='white')
 Label(f1, text='Browse photo to upload', width=20,
       font=('Times', 15), bg='white').pack(side='left')
-Label(f1, text='format:.jpg', bg='white',
+Label(f1, text='format:.jpg/.png/.jpeg', bg='white',
+        font=('Times', 10),
       width=30).pack(side='right', padx=5)
 Button(f1, text='Upload card', bg="#07FF41", font=('Times', 15),
        width=70, command=upload_file).pack(side='right')

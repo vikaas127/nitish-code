@@ -23,54 +23,104 @@ root.minsize(600, 500)
 root.title('Visiting card scanner')
 
 # function for uploading file to GUI
-filename = None
-start = 0
-last = 0
-def upload_file(): 
-    global filename, start, last
+def upload_file():        
+    global filename
+    global start, last
+    # filename = filedialog.askopenfilename(
+    #     initialdir='/Desktop', title = 'Select a card image',
+    #   filetypes=(('jpeg files', '*.jpg'), ('png files', '*.png')))
     filename = filedialog.askopenfilename(
-        initialdir='/Desktop', title = 'Select a card image',
-      filetypes=(('jpeg files', '*.jpg'), ('png files', '*.png')))
-  
-    if filename == 'jpeg' or filename == 'png':
+    initialdir='/Desktop', 
+    title='Select a card image',
+    filetypes=(('Image files', '*.jpg *.jpeg *.png'),))
+
+    
+    if filename == '':
         t.delete(1.0, END)
         t.insert(1.0, 'You have not provided any image to convert')
-        
+        tmsg.showwarning(
+            title = 'Alert!', message = 'Please provide proper formatted image')
+        return
       
     else:
-     p_label_var.set('Image uploaded successfully')
-    l.config(fg='#0CDD19')
+        p_label_var.set('Image uploaded successfully')
+        l.config(fg='#0CDD19')
     
-    if filename.endswith('.JPG') or filename.endswith('.JPEG') or filename.endswith('.jpg') or filename.endswith('.jpeg') or filename.endswith('.PNG') or filename.endswith('.png'):
+    # if filename.endswith('.JPG') or filename.endswith('.JPEG') or filename.endswith('.jpg') or filename.endswith('.jpeg') or filename.endswith('.PNG') or filename.endswith('.png'):
+    #     filename_rev = filename[::-1]
+    #     last = filename.index('.')
+    #     start = len(filename) - filename_rev.index('/') - 1
+
+
+
+    if filename.lower().endswith(('.jpg', '.jpeg', '.png')):
         filename_rev = filename[::-1]
         last = filename.index('.')
         start = len(filename) - filename_rev.index('/') - 1
 
+
+
 # function for conversion
-def convert():  
-    global filename, start, last      
-    try:
-        c_label_var.set('Output...')
-        pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract'
-        text = pytesseract.image_to_string(filename)
-        t.delete(1.0, END)
-        t.insert(1.0, text)
-        root1 = Toplevel()
-        root1.title('Uploaded image')
-        img1 = ImageTk.PhotoImage(Image.open(filename))
-        Label(root1, image=img1).pack()
-        root1.mainloop()
-    except:
+# def convert():        
+#     try:
+#         c_label_var.set('Output...')
+#         pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract'
+#         text = pytesseract.image_to_string(filename)
+#         t.delete(1.0, END)
+#         t.insert(1.0, text)
+#         root1 = Toplevel()
+#         root1.title('Uploaded image')
+#         img1 = ImageTk.PhotoImage(Image.open(filename))
+#         Label(root1, image=img1).pack()
+#         root1.mainloop()
+#     except:
+#         t.delete(1.0, END)
+#         t.insert(1.0, 'You have not provided any image to convert')
+#         tmsg.showwarning(
+#             title='Alert!', message='Please provide proper formatted image')
+#         return
+#     f_name = filename[start+1:last]+'.txt'
+#     f_name = os.path.join(r'Database', f_name)
+#     f = open(f_name, 'w')
+#     f.write(text)
+#     f.close()
+
+def convert():
+    global filename, start, last   # use same globals as upload_file
+
+    if not filename:  # no file selected yet
         t.delete(1.0, END)
         t.insert(1.0, 'You have not provided any image to convert')
         tmsg.showwarning(
             title='Alert!', message='Please provide proper formatted image')
         return
-    f_name = filename[start+1:last]+'.txt'
-    f_name = os.path.join(r'Database', f_name)
-    f = open(f_name, 'w')
-    f.write(text)
-    f.close()
+
+    try:
+        c_label_var.set('Output...')
+        pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+        text = pytesseract.image_to_string(filename)
+        t.delete(1.0, END)
+        t.insert(1.0, text)
+
+        # show uploaded image
+        root1 = Toplevel()
+        root1.title('Uploaded image')
+        img1 = ImageTk.PhotoImage(Image.open(filename))
+        Label(root1, image=img1).pack()
+        root1.img1 = img1  # keep reference
+
+        # ---- Save OCR text to a file inside Database folder ----
+        f_name = filename[start + 1:last] + '.txt'
+        save_dir = 'Database'
+        os.makedirs(save_dir, exist_ok=True)  # create folder if missing
+        f_path = os.path.join(save_dir, f_name)
+        with open(f_path, 'w', encoding='utf-8') as f:
+            f.write(text)
+
+    except Exception as e:
+        t.delete(1.0, END)
+        t.insert(1.0, 'Error: ' + str(e))
+        tmsg.showwarning(title='Alert!', message='Please provide proper formatted image')
 
 # Menu bar and navigation tab creation
 mainmenu = Menu(root)
@@ -108,7 +158,7 @@ f1 = Frame()
 f1.config(bg='white')
 Label(f1, text='Browse photo to upload', width=20,
       font=('Times', 15), bg='white').pack(side='left')
-Label(f1, text='format:.jpg', bg='white',
+Label(f1, text='format: png/jpeg', bg='white',
       width=30).pack(side='right', padx=5)
 Button(f1, text='Upload card', bg="#07FF41", font=('Times', 15),
        width=70, command=upload_file).pack(side='right')
